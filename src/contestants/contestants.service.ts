@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { CreateContestantDto } from './dto/create-contestant.dto';
-import { UpdateContestantDto } from './dto/update-contestant.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Contestant } from './entities/contestant.entity';
 
 @Injectable()
 export class ContestantsService {
-  create(createContestantDto: CreateContestantDto) {
-    return 'This action adds a new contestant';
+  constructor(
+    @InjectRepository(Contestant)
+    private contestantsRepository: Repository<Contestant>,
+  ) {}
+
+  // Crear un nuevo concursante
+  async create(contestant: Contestant): Promise<Contestant> {
+    return this.contestantsRepository.save(contestant); // Guardamos y devolvemos el objeto creado
   }
 
-  findAll() {
-    return `This action returns all contestants`;
+  // Obtener todos los concursantes
+  async findAll(): Promise<Contestant[]> {
+    return this.contestantsRepository.find(); // Devolvemos un array de Contestants
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contestant`;
+  // Obtener un concursante por su ID
+  async findOne(id: string): Promise<Contestant> {
+    const contestant = await this.contestantsRepository.findOneBy({ id });
+    if (!contestant) {
+      throw new NotFoundException(`Contestant with ID ${id} not found`); // Lanzamos una excepción si no se encuentra
+    }
+    return contestant; // Devolvemos el concursante encontrado
   }
 
-  update(id: number, updateContestantDto: UpdateContestantDto) {
-    return `This action updates a #${id} contestant`;
+  // Actualizar un concursante
+  async update(id: string, contestant: Contestant): Promise<Contestant> {
+    const existingContestant = await this.contestantsRepository.findOneBy({ id });
+    if (!existingContestant) {
+      throw new NotFoundException(`Contestant with ID ${id} not found`);
+    }
+    await this.contestantsRepository.update(id, contestant); // Actualizamos el objeto
+    const updatedContestant = await this.contestantsRepository.findOneBy({ id });
+    if (!updatedContestant) {
+      throw new NotFoundException(`Contestant with ID ${id} not found`);
+    }
+    return updatedContestant; // Devolvemos el objeto actualizado
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contestant`;
+  // Eliminar un concursante
+  async remove(id: string): Promise<void> {
+    const contestant = await this.contestantsRepository.findOneBy({id});
+    if (!contestant) {
+      throw new NotFoundException(`Contestant with ID ${id} not found`);
+    }
+    await this.contestantsRepository.delete(id); // Eliminamos el objeto
   }
 }

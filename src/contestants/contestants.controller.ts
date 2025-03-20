@@ -1,34 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { ContestantsService } from './contestants.service';
-import { CreateContestantDto } from './dto/create-contestant.dto';
-import { UpdateContestantDto } from './dto/update-contestant.dto';
+import { Contestant } from './entities/contestant.entity'
 
 @Controller('contestants')
 export class ContestantsController {
   constructor(private readonly contestantsService: ContestantsService) {}
 
   @Post()
-  create(@Body() createContestantDto: CreateContestantDto) {
-    return this.contestantsService.create(createContestantDto);
+  create(@Body() contestant: Contestant) {
+    return this.contestantsService.create(contestant);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Contestant[]> {
     return this.contestantsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contestantsService.findOne(+id);
+  findOne(@Param('id') id: string): Promise<Contestant> {
+    return this.contestantsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContestantDto: UpdateContestantDto) {
-    return this.contestantsService.update(+id, updateContestantDto);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() contestant: Contestant): Promise<Contestant> {
+    return this.contestantsService.update(id, contestant);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contestantsService.remove(+id);
+  remove(@Param('id') id: string): Promise<void> {
+    return this.contestantsService.remove(id);
   }
 }

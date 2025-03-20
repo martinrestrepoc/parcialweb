@@ -1,34 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { BmtransactionsService } from './bmtransactions.service';
-import { CreateBmtransactionDto } from './dto/create-bmtransaction.dto';
-import { UpdateBmtransactionDto } from './dto/update-bmtransaction.dto';
+import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
+import { BmTransactionsService } from './bmtransactions.service';
+import { BmTransaction } from './entities/bmtransaction.entity';
 
 @Controller('bmtransactions')
-export class BmtransactionsController {
-  constructor(private readonly bmtransactionsService: BmtransactionsService) {}
+export class BmTransactionsController {
+  constructor(private readonly bmTransactionsService: BmTransactionsService) {}
 
   @Post()
-  create(@Body() createBmtransactionDto: CreateBmtransactionDto) {
-    return this.bmtransactionsService.create(createBmtransactionDto);
+  async create(@Body() transaction: BmTransaction): Promise<BmTransaction> {
+    return this.bmTransactionsService.create(transaction);
   }
 
   @Get()
-  findAll() {
-    return this.bmtransactionsService.findAll();
+  async findAll(): Promise<BmTransaction[]> {
+    return this.bmTransactionsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bmtransactionsService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<BmTransaction> {
+    return this.bmTransactionsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBmtransactionDto: UpdateBmtransactionDto) {
-    return this.bmtransactionsService.update(+id, updateBmtransactionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bmtransactionsService.remove(+id);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() transaction: BmTransaction): Promise<BmTransaction> {
+    return this.bmTransactionsService.update(id, transaction);
   }
 }

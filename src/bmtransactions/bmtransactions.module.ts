@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BmtransactionsService } from './bmtransactions.service';
-import { BmtransactionsController } from './bmtransactions.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BmTransaction } from './entities/bmtransaction.entity';
+import { BmTransactionsService } from './bmtransactions.service';
+import { BmTransactionsController } from './bmtransactions.controller';
 
 @Module({
-  controllers: [BmtransactionsController],
-  providers: [BmtransactionsService],
+  imports: [TypeOrmModule.forFeature([BmTransaction])],  // Inyección del repositorio de BmTransaction
+  providers: [BmTransactionsService],
+  controllers: [BmTransactionsController],
 })
-export class BmtransactionsModule {}
+export class BmTransactionsModule {}

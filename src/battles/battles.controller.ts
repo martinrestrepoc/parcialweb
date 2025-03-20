@@ -1,34 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
 import { BattlesService } from './battles.service';
-import { CreateBattleDto } from './dto/create-battle.dto';
-import { UpdateBattleDto } from './dto/update-battle.dto';
+import { Battle } from './entities/battle.entity';
 
 @Controller('battles')
 export class BattlesController {
   constructor(private readonly battlesService: BattlesService) {}
 
   @Post()
-  create(@Body() createBattleDto: CreateBattleDto) {
-    return this.battlesService.create(createBattleDto);
+  async create(@Body() battle: Battle): Promise<Battle> {
+    return this.battlesService.create(battle);
   }
 
   @Get()
-  findAll() {
+  async findAll(): Promise<Battle[]> {
     return this.battlesService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.battlesService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<Battle> {
+    return this.battlesService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBattleDto: UpdateBattleDto) {
-    return this.battlesService.update(+id, updateBattleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.battlesService.remove(+id);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() battle: Battle): Promise<Battle> {
+    return this.battlesService.update(id, battle);
   }
 }

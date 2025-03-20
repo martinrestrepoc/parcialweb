@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { CreateSponsorDto } from './dto/create-sponsor.dto';
-import { UpdateSponsorDto } from './dto/update-sponsor.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Sponsor } from './entities/sponsor.entity';
 
 @Injectable()
 export class SponsorsService {
-  create(createSponsorDto: CreateSponsorDto) {
-    return 'This action adds a new sponsor';
+  constructor(
+    @InjectRepository(Sponsor)
+    private sponsorsRepository: Repository<Sponsor>,
+  ) {}
+
+  async create(sponsor: Sponsor): Promise<Sponsor> {
+    return this.sponsorsRepository.save(sponsor);
   }
 
-  findAll() {
-    return `This action returns all sponsors`;
+  async findAll(): Promise<Sponsor[]> {
+    return this.sponsorsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sponsor`;
+  async findOne(id: string): Promise<Sponsor> {
+    const sponsor = await this.sponsorsRepository.findOneBy({ id });
+    if (!sponsor) {
+      throw new NotFoundException(`Sponsor with ID ${id} not found`);
+    }
+    return sponsor;
   }
 
-  update(id: number, updateSponsorDto: UpdateSponsorDto) {
-    return `This action updates a #${id} sponsor`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} sponsor`;
+  async update(id: string, sponsor: Sponsor): Promise<Sponsor> {
+    const existingSponsor = await this.sponsorsRepository.findOneBy({ id });
+    if (!existingSponsor) {
+      throw new NotFoundException(`Sponsor with ID ${id} not found`);
+    }
+    await this.sponsorsRepository.update(id, sponsor);
+    const updatedSponsor = await this.sponsorsRepository.findOneBy({ id });
+    if (!updatedSponsor) {
+      throw new NotFoundException(`Sponsor with ID ${id} not found`);
+    }
+    return updatedSponsor;
   }
 }

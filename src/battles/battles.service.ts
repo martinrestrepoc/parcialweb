@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBattleDto } from './dto/create-battle.dto';
-import { UpdateBattleDto } from './dto/update-battle.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Battle } from './entities/battle.entity';
 
 @Injectable()
 export class BattlesService {
-  create(createBattleDto: CreateBattleDto) {
-    return 'This action adds a new battle';
+  constructor(
+    @InjectRepository(Battle)
+    private battlesRepository: Repository<Battle>,
+  ) {}
+
+  async create(battle: Battle): Promise<Battle> {
+    return this.battlesRepository.save(battle);
   }
 
-  findAll() {
-    return `This action returns all battles`;
+  async findAll(): Promise<Battle[]> {
+    return this.battlesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} battle`;
+  async findOne(id: string): Promise<Battle> {
+    const battle = await this.battlesRepository.findOneBy({ id });
+    if (!battle) {
+      throw new NotFoundException(`Battle with ID ${id} not found`);
+    }
+    return battle;
   }
 
-  update(id: number, updateBattleDto: UpdateBattleDto) {
-    return `This action updates a #${id} battle`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} battle`;
+  async update(id: string, battle: Battle): Promise<Battle> {
+    const existingBattle = await this.battlesRepository.findOneBy({ id });
+    if (!existingBattle) {
+      throw new NotFoundException(`Battle with ID ${id} not found`);
+    }
+    await this.battlesRepository.update(id, battle);
+    const updatedBattle = await this.battlesRepository.findOneBy({ id });
+    if (!updatedBattle) {
+      throw new NotFoundException(`Battle with ID ${id} not found`);
+    }
+    return updatedBattle;
   }
 }

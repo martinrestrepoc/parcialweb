@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class BlackMarketTransaction {
+export class BmTransaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

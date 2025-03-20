@@ -6,14 +6,14 @@ export class Dictator {
   id: string;
 
   @Column()
-  name: string;
+  name: string; // Nombre del dictador
 
   @Column()
-  territory: string;
+  territory: string; // Territorio que gobierna
 
   @Column()
-  number_of_slaves: number;
+  number_of_slaves: number; // Número de esclavos que posee
 
   @Column()
-  loyalty_to_Carolina: number; // 1-100
+  loyalty_to_Carolina: number; // Nivel de lealtad (1-100)
 }

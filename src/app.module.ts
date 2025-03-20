@@ -5,11 +5,13 @@ import { ContestantsModule } from './contestants/contestants.module';
 import { BattlesModule } from './battles/battles.module';
 import { DictatorsModule } from './dictators/dictators.module';
 import { SponsorsModule } from './sponsors/sponsors.module';
-import { BmtransactionsModule } from './bmtransactions/bmtransactions.module';
+import { BmTransactionsModule } from './bmtransactions/bmtransactions.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     // Configuración de TypeORM para conectar a la base de datos de Supabase
     TypeOrmModule.forRoot({
       type: 'postgres', // Tipo de base de datos
@@ -23,7 +25,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     BattlesModule, // Manejo de peleas
     DictatorsModule, // Manejo de dictadores
     SponsorsModule, // Manejo de patrocinadores
-    BmtransactionsModule, // Manejo del mercado negro
+    BmTransactionsModule, // Manejo del mercado negro
   ],
 })
 export class AppModule {}

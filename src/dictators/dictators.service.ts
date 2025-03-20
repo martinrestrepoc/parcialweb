@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDictatorDto } from './dto/create-dictator.dto';
-import { UpdateDictatorDto } from './dto/update-dictator.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Dictator } from './entities/dictator.entity';
 
 @Injectable()
 export class DictatorsService {
-  create(createDictatorDto: CreateDictatorDto) {
-    return 'This action adds a new dictator';
+  constructor(
+    @InjectRepository(Dictator)
+    private dictatorsRepository: Repository<Dictator>,
+  ) {}
+
+  async create(dictator: Dictator): Promise<Dictator> {
+    return this.dictatorsRepository.save(dictator);
   }
 
-  findAll() {
-    return `This action returns all dictators`;
+  async findAll(): Promise<Dictator[]> {
+    return this.dictatorsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} dictator`;
+  async findOne(id: string): Promise<Dictator> {
+    const dictator = await this.dictatorsRepository.findOneBy({ id });
+    if (!dictator) {
+      throw new NotFoundException(`Dictator with ID ${id} not found`);
+    }
+    return dictator;
   }
 
-  update(id: number, updateDictatorDto: UpdateDictatorDto) {
-    return `This action updates a #${id} dictator`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} dictator`;
+  async update(id: string, dictator: Dictator): Promise<Dictator> {
+    const existingDictator = await this.dictatorsRepository.findOneBy({ id });
+    if (!existingDictator) {
+      throw new NotFoundException(`Dictator with ID ${id} not found`);
+    }
+    await this.dictatorsRepository.update(id, dictator);
+    const updatedDictator = await this.dictatorsRepository.findOneBy({ id });
+    if (!updatedDictator) {
+      throw new NotFoundException(`Dictator with ID ${id} not found`);
+    }
+    return updatedDictator;
   }
 }
