@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsArray, IsOptional } from 'class-validator';
 
 export class CreateDictatorDto {
   @IsString()
@@ -15,4 +15,8 @@ export class CreateDictatorDto {
   @Min(1)
   @Max(100)
   loyalty_to_Carolina: number;
+
+  @IsArray()
+  @IsOptional()
+  special_events?: string[];
 }

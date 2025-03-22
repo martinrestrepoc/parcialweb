@@ -36,7 +36,7 @@ export class DictatorsService {
   async update(id: string, updateDictatorDto: UpdateDictatorDto): Promise<Dictator> {
     const existingDictator = await this.findOne(id);
     await this.dictatorsRepository.update(id, updateDictatorDto);
-    return this.findOne(id); // Return updated dictator
+    return this.findOne(id);
   }
 
   async findContestants(id: string): Promise<Contestant[]> {
@@ -46,7 +46,7 @@ export class DictatorsService {
 
   async addSpecialEvent(id: string, event: string): Promise<Dictator> {
     const dictator = await this.findOne(id);
-    dictator.special_events = [...dictator.special_events, event]; // Ensures immutability
+    dictator.special_events = [...dictator.special_events, event];
     return this.dictatorsRepository.save(dictator);
   }
 

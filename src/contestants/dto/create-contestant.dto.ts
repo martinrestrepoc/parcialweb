@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsUUID, Min, Max } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsEnum } from 'class-validator';
 
 export class CreateContestantDto {
   @IsString()
@@ -10,27 +10,27 @@ export class CreateContestantDto {
   @IsString()
   origin: string;
 
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(100)
   strength: number;
 
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(100)
   agility: number;
 
-  @IsNumber()
+  @IsInt()
   @Min(0)
   wins: number;
 
-  @IsNumber()
+  @IsInt()
   @Min(0)
   losses: number;
 
   @IsEnum(['Alive', 'Dead', 'Escaped', 'Free'])
   status: 'Alive' | 'Dead' | 'Escaped' | 'Free';
 
-  @IsUUID()
-  dictatorId: string;
+  @IsString()
+  dictatorId: string; // id del dictador
 }
