@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dictator } from './entities/dictator.entity';
+import { Contestant } from '../contestants/entities/contestant.entity';
 
 @Injectable()
 export class DictatorsService {
@@ -27,15 +28,32 @@ export class DictatorsService {
   }
 
   async update(id: string, dictator: Dictator): Promise<Dictator> {
-    const existingDictator = await this.dictatorsRepository.findOneBy({ id });
-    if (!existingDictator) {
+    const existing = await this.dictatorsRepository.findOneBy({ id });
+    if (!existing) {
       throw new NotFoundException(`Dictator with ID ${id} not found`);
     }
     await this.dictatorsRepository.update(id, dictator);
-    const updatedDictator = await this.dictatorsRepository.findOneBy({ id });
-    if (!updatedDictator) {
+    const updated = await this.dictatorsRepository.findOneBy({ id });
+    if (!updated) {
       throw new NotFoundException(`Dictator with ID ${id} not found`);
     }
-    return updatedDictator;
+    return updated;
+  }
+
+  async findContestants(id: string): Promise<Contestant[]> {
+    const dictator = await this.dictatorsRepository.findOne({
+      where: { id },
+      relations: ['contestants'],
+    });
+    if (!dictator) {
+      throw new NotFoundException(`Dictator with ID ${id} not found`);
+    }
+    return dictator.contestants;
+  }
+
+  async addSpecialEvent(id: string, event: string): Promise<Dictator> {
+    const dictator = await this.findOne(id);
+    dictator.special_events.push(event);
+    return this.dictatorsRepository.save(dictator);
   }
 }

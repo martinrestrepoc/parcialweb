@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Patch } from '@nestjs/common';
 import { DictatorsService } from './dictators.service';
 import { Dictator } from './entities/dictator.entity';
 
@@ -25,4 +25,12 @@ export class DictatorsController {
   async update(@Param('id') id: string, @Body() dictator: Dictator): Promise<Dictator> {
     return this.dictatorsService.update(id, dictator);
   }
+
+  @Patch(':id/special-event')
+async addEvent(
+  @Param('id') id: string,
+  @Body() body: { event: string }
+): Promise<Dictator> {
+  return this.dictatorsService.addSpecialEvent(id, body.event);
+}
 }

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Dictator } from '../../dictators/entities/dictator.entity';
 
 @Entity()
 export class Contestant {
@@ -31,4 +32,10 @@ export class Contestant {
     enum: ['Alive', 'Dead', 'Escaped', 'Free'],
   })
   status: 'Alive' | 'Dead' | 'Escaped' | 'Free';
+
+  @Column()
+  rank: string;
+
+  @ManyToOne(() => Dictator, (dictator) => dictator.contestants)
+  dictator: Dictator;
 }

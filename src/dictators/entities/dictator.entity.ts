@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Contestant } from '../../contestants/entities/contestant.entity';
 
 @Entity()
 export class Dictator {
@@ -6,14 +7,20 @@ export class Dictator {
   id: string;
 
   @Column()
-  name: string; // Nombre del dictador
+  name: string;
 
   @Column()
-  territory: string; // Territorio que gobierna
+  territory: string;
 
   @Column()
-  number_of_slaves: number; // Número de esclavos que posee
+  number_of_slaves: number;
 
   @Column()
-  loyalty_to_Carolina: number; // Nivel de lealtad (1-100)
+  loyalty_to_Carolina: number;
+
+  @Column('simple-array', { default: '' })
+  special_events: string[];
+
+  @OneToMany(() => Contestant, (contestant) => contestant.dictator)
+  contestants: Contestant[];
 }
