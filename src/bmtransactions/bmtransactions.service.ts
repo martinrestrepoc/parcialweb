@@ -36,7 +36,7 @@ export class BmTransactionsService {
     }
 
     await this.bmTransactionsRepository.update(id, updateTransactionDto);
-    return this.findOne(id); // Return updated transaction
+    return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {

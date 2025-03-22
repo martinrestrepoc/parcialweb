@@ -21,7 +21,7 @@ export class ContestantsService {
     const dictator = await this.dictatorsRepository.findOneBy({ id: dictatorId });
     if (!dictator) throw new NotFoundException(`Dictator with ID ${dictatorId} not found`);
   
-    // Create a new Contestant instance from the DTO
+    // crea un nuevo concursante con el dto
     const contestant = this.contestantsRepository.create(createContestantDto);
     contestant.dictator = dictator;
     contestant.rank = this.calculateRank(contestant.wins, contestant.losses);
@@ -52,7 +52,7 @@ export class ContestantsService {
       throw new NotFoundException(`Contestant with ID ${id} not found`);
     }
   
-    // Update only the provided fields
+    // recalcula el rank si cambian las wins o las losses
     const updatedContestant = { ...existingContestant, ...updateContestantDto };
     updatedContestant.rank = this.calculateRank(updatedContestant.wins, updatedContestant.losses);
   
@@ -77,7 +77,7 @@ export class ContestantsService {
     return 'Coward';
   }
 
-  // Actualizar solo el status (por ejemplo: "Free", "Dead")
+  // Actualizar solo el status (Si murió, escapó, etc.)
   async updateStatus(id: string, status: 'Alive' | 'Dead' | 'Escaped' | 'Free'): Promise<Contestant> {
     if (!['Alive', 'Dead', 'Escaped', 'Free'].includes(status)) {
       throw new Error('Invalid status value');
@@ -90,7 +90,7 @@ export class ContestantsService {
   }
   
 
-  // Incrementar wins o losses (según resultado de batalla)
+  // Incrementar wins o losses según el resultado de batalla
   async registerBattleResult(id: string, result: 'win' | 'loss'): Promise<Contestant> {
     const contestant = await this.findOne(id);
     if (result === 'win') contestant.wins++;

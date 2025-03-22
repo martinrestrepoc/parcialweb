@@ -15,7 +15,7 @@ export class BattlesService {
   async create(createBattleDto: CreateBattleDto): Promise<Battle> {
     const battle = this.battlesRepository.create({
       ...createBattleDto,
-      date: Date.now(), // Ensure timestamp is generated on creation
+      date: Date.now(), 
     });
     return this.battlesRepository.save(battle);
   }
