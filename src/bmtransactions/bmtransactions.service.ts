@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BmTransaction } from './entities/bmtransaction.entity';
+import { CreateBmTransactionDto } from './dto/create-bmtransaction.dto';
+import { UpdateBmTransactionDto } from './dto/update-bmtransaction.dto';
 
 @Injectable()
 export class BmTransactionsService {
@@ -10,7 +12,8 @@ export class BmTransactionsService {
     private bmTransactionsRepository: Repository<BmTransaction>,
   ) {}
 
-  async create(transaction: BmTransaction): Promise<BmTransaction> {
+  async create(createTransactionDto: CreateBmTransactionDto): Promise<BmTransaction> {
+    const transaction = this.bmTransactionsRepository.create(createTransactionDto);
     return this.bmTransactionsRepository.save(transaction);
   }
 
@@ -26,16 +29,21 @@ export class BmTransactionsService {
     return transaction;
   }
 
-  async update(id: string, transaction: BmTransaction): Promise<BmTransaction> {
+  async update(id: string, updateTransactionDto: UpdateBmTransactionDto): Promise<BmTransaction> {
     const existingTransaction = await this.bmTransactionsRepository.findOneBy({ id });
     if (!existingTransaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
-    await this.bmTransactionsRepository.update(id, transaction);
-    const updatedTransaction = await this.bmTransactionsRepository.findOneBy({ id });
-    if (!updatedTransaction) {
+
+    await this.bmTransactionsRepository.update(id, updateTransactionDto);
+    return this.findOne(id); // Return updated transaction
+  }
+
+  async remove(id: string): Promise<void> {
+    const transaction = await this.bmTransactionsRepository.findOneBy({ id });
+    if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
-    return updatedTransaction;
+    await this.bmTransactionsRepository.delete(id);
   }
 }

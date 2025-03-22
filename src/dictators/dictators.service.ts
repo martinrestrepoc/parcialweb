@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dictator } from './entities/dictator.entity';
 import { Contestant } from '../contestants/entities/contestant.entity';
+import { CreateDictatorDto } from './dto/create-dictator.dto';
+import { UpdateDictatorDto } from './dto/update-dictator.dto';
 
 @Injectable()
 export class DictatorsService {
@@ -11,7 +13,8 @@ export class DictatorsService {
     private dictatorsRepository: Repository<Dictator>,
   ) {}
 
-  async create(dictator: Dictator): Promise<Dictator> {
+  async create(createDictatorDto: CreateDictatorDto): Promise<Dictator> {
+    const dictator = this.dictatorsRepository.create(createDictatorDto);
     return this.dictatorsRepository.save(dictator);
   }
 
@@ -20,40 +23,35 @@ export class DictatorsService {
   }
 
   async findOne(id: string): Promise<Dictator> {
-    const dictator = await this.dictatorsRepository.findOneBy({ id });
+    const dictator = await this.dictatorsRepository.findOne({
+      where: { id },
+      relations: ['contestants'], // Ensure related contestants are loaded
+    });
     if (!dictator) {
       throw new NotFoundException(`Dictator with ID ${id} not found`);
     }
     return dictator;
   }
 
-  async update(id: string, dictator: Dictator): Promise<Dictator> {
-    const existing = await this.dictatorsRepository.findOneBy({ id });
-    if (!existing) {
-      throw new NotFoundException(`Dictator with ID ${id} not found`);
-    }
-    await this.dictatorsRepository.update(id, dictator);
-    const updated = await this.dictatorsRepository.findOneBy({ id });
-    if (!updated) {
-      throw new NotFoundException(`Dictator with ID ${id} not found`);
-    }
-    return updated;
+  async update(id: string, updateDictatorDto: UpdateDictatorDto): Promise<Dictator> {
+    const existingDictator = await this.findOne(id);
+    await this.dictatorsRepository.update(id, updateDictatorDto);
+    return this.findOne(id); // Return updated dictator
   }
 
   async findContestants(id: string): Promise<Contestant[]> {
-    const dictator = await this.dictatorsRepository.findOne({
-      where: { id },
-      relations: ['contestants'],
-    });
-    if (!dictator) {
-      throw new NotFoundException(`Dictator with ID ${id} not found`);
-    }
+    const dictator = await this.findOne(id);
     return dictator.contestants;
   }
 
   async addSpecialEvent(id: string, event: string): Promise<Dictator> {
     const dictator = await this.findOne(id);
-    dictator.special_events.push(event);
+    dictator.special_events = [...dictator.special_events, event]; // Ensures immutability
     return this.dictatorsRepository.save(dictator);
+  }
+
+  async remove(id: string): Promise<void> {
+    const dictator = await this.findOne(id);
+    await this.dictatorsRepository.delete(id);
   }
 }

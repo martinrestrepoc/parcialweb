@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contestant } from './entities/contestant.entity';
 import { Dictator } from '../dictators/entities/dictator.entity';
+import { CreateContestantDto } from './dto/create-contestant.dto';
+import { UpdateContestantDto } from './dto/update-contestant.dto';
 
 
 @Injectable()
@@ -15,19 +17,24 @@ export class ContestantsService {
   ) {}
 
   // Crear un nuevo concursante
-  async create(contestant: Contestant, dictatorId: string): Promise<Contestant> {
+  async create(createContestantDto: CreateContestantDto, dictatorId: string): Promise<Contestant> {
     const dictator = await this.dictatorsRepository.findOneBy({ id: dictatorId });
     if (!dictator) throw new NotFoundException(`Dictator with ID ${dictatorId} not found`);
   
+    // Create a new Contestant instance from the DTO
+    const contestant = this.contestantsRepository.create(createContestantDto);
     contestant.dictator = dictator;
     contestant.rank = this.calculateRank(contestant.wins, contestant.losses);
+    
     return this.contestantsRepository.save(contestant);
   }
+  
 
   // Obtener todos los concursantes
   async findAll(): Promise<Contestant[]> {
-    return this.contestantsRepository.find();
+    return this.contestantsRepository.find({ relations: ['dictator'] });
   }
+  
 
   // Obtener un concursante por su ID
   async findOne(id: string): Promise<Contestant> {
@@ -39,21 +46,20 @@ export class ContestantsService {
   }
 
   // Actualizar un concursante
-  async update(id: string, contestant: Contestant): Promise<Contestant> {
-    const existing = await this.contestantsRepository.findOneBy({ id });
-    if (!existing) {
+  async update(id: string, updateContestantDto: UpdateContestantDto): Promise<Contestant> {
+    const existingContestant = await this.contestantsRepository.findOneBy({ id });
+    if (!existingContestant) {
       throw new NotFoundException(`Contestant with ID ${id} not found`);
     }
-
-    // Recalcular el rank si cambian wins o losses
-    contestant.rank = this.calculateRank(contestant.wins, contestant.losses);
-    await this.contestantsRepository.update(id, contestant);
-    const updatedContestant = await this.contestantsRepository.findOneBy({ id });
-    if (!updatedContestant) {
-      throw new NotFoundException(`Contestant with ID ${id} not found`);
-    }
+  
+    // Update only the provided fields
+    const updatedContestant = { ...existingContestant, ...updateContestantDto };
+    updatedContestant.rank = this.calculateRank(updatedContestant.wins, updatedContestant.losses);
+  
+    await this.contestantsRepository.save(updatedContestant);
     return updatedContestant;
   }
+  
 
   // Eliminar un concursante
   async remove(id: string): Promise<void> {
@@ -72,12 +78,17 @@ export class ContestantsService {
   }
 
   // Actualizar solo el status (por ejemplo: "Free", "Dead")
-  async updateStatus(id: string, status: Contestant['status']): Promise<Contestant> {
+  async updateStatus(id: string, status: 'Alive' | 'Dead' | 'Escaped' | 'Free'): Promise<Contestant> {
+    if (!['Alive', 'Dead', 'Escaped', 'Free'].includes(status)) {
+      throw new Error('Invalid status value');
+    }
+  
     const contestant = await this.findOne(id);
     contestant.status = status;
     await this.contestantsRepository.save(contestant);
     return contestant;
   }
+  
 
   // Incrementar wins o losses (según resultado de batalla)
   async registerBattleResult(id: string, result: 'win' | 'loss'): Promise<Contestant> {
