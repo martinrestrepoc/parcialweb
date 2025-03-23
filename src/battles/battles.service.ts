@@ -2,8 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Battle } from './entities/battle.entity';
-import { CreateBattleDto } from './dto/create-battle.dto';
-import { UpdateBattleDto } from './dto/update-battle.dto';
 
 @Injectable()
 export class BattlesService {
@@ -12,11 +10,7 @@ export class BattlesService {
     private battlesRepository: Repository<Battle>,
   ) {}
 
-  async create(createBattleDto: CreateBattleDto): Promise<Battle> {
-    const battle = this.battlesRepository.create({
-      ...createBattleDto,
-      date: Date.now(), 
-    });
+  async create(battle: Battle): Promise<Battle> {
     return this.battlesRepository.save(battle);
   }
 
@@ -32,21 +26,26 @@ export class BattlesService {
     return battle;
   }
 
-  async update(id: string, updateBattleDto: UpdateBattleDto): Promise<Battle> {
-    const existingBattle = await this.battlesRepository.findOneBy({ id });
-    if (!existingBattle) {
+  async update(id: string, battle: Battle): Promise<Battle> {
+    const existing = await this.battlesRepository.findOneBy({ id });
+    if (!existing) {
       throw new NotFoundException(`Battle with ID ${id} not found`);
     }
-
-    await this.battlesRepository.update(id, updateBattleDto);
-    return this.findOne(id); // Return updated battle
+    await this.battlesRepository.update(id, battle);
+    const updatedBattle = await this.battlesRepository.findOneBy({ id });
+    if (!updatedBattle) {
+      throw new NotFoundException(`Battle with ID ${id} not found after update`);
+    }
+    return updatedBattle;
   }
 
-  async remove(id: string): Promise<void> {
-    const battle = await this.battlesRepository.findOneBy({ id });
-    if (!battle) {
-      throw new NotFoundException(`Battle with ID ${id} not found`);
+  //  Añadir un dictador a la lista de apuestas
+  async addBet(id: string, dictatorId: string): Promise<Battle> {
+    const battle = await this.findOne(id);
+    if (!battle.bets) battle.bets = [];
+    if (!battle.bets.includes(dictatorId)) {
+      battle.bets.push(dictatorId);
     }
-    await this.battlesRepository.delete(id);
+    return this.battlesRepository.save(battle);
   }
 }

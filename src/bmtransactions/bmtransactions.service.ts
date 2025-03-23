@@ -2,8 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BmTransaction } from './entities/bmtransaction.entity';
-import { CreateBmTransactionDto } from './dto/create-bmtransaction.dto';
-import { UpdateBmTransactionDto } from './dto/update-bmtransaction.dto';
 
 @Injectable()
 export class BmTransactionsService {
@@ -12,8 +10,9 @@ export class BmTransactionsService {
     private bmTransactionsRepository: Repository<BmTransaction>,
   ) {}
 
-  async create(createTransactionDto: CreateBmTransactionDto): Promise<BmTransaction> {
-    const transaction = this.bmTransactionsRepository.create(createTransactionDto);
+  // ✅ acepta data parcial para ser reutilizable
+  async create(data: Partial<BmTransaction>): Promise<BmTransaction> {
+    const transaction = this.bmTransactionsRepository.create(data);
     return this.bmTransactionsRepository.save(transaction);
   }
 
@@ -29,21 +28,16 @@ export class BmTransactionsService {
     return transaction;
   }
 
-  async update(id: string, updateTransactionDto: UpdateBmTransactionDto): Promise<BmTransaction> {
-    const existingTransaction = await this.bmTransactionsRepository.findOneBy({ id });
-    if (!existingTransaction) {
+  async update(id: string, transaction: BmTransaction): Promise<BmTransaction> {
+    const existing = await this.bmTransactionsRepository.findOneBy({ id });
+    if (!existing) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
-
-    await this.bmTransactionsRepository.update(id, updateTransactionDto);
-    return this.findOne(id);
-  }
-
-  async remove(id: string): Promise<void> {
-    const transaction = await this.bmTransactionsRepository.findOneBy({ id });
-    if (!transaction) {
+    await this.bmTransactionsRepository.update(id, transaction);
+    const updatedTransaction = await this.bmTransactionsRepository.findOneBy({ id });
+    if (!updatedTransaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
-    await this.bmTransactionsRepository.delete(id);
+    return updatedTransaction;
   }
 }

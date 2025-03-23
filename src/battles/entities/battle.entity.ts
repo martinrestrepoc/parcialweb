@@ -6,13 +6,13 @@ export class Battle {
   id: string;
 
   @Column()
-  contestant_1: string; // UUID del primer concursante
+  contestant_1: string;
 
   @Column()
-  contestant_2: string; // UUID del segundo concursante
+  contestant_2: string;
 
   @Column({ nullable: true })
-  winner_id: string; // UUID del ganador
+  winner_id: string;
 
   @Column()
   death_occurred: boolean;
@@ -21,5 +21,14 @@ export class Battle {
   injuries: string;
 
   @Column()
+  kills: number;
+
+  @Column()
+  betrayals: number;
+
+  @Column()
   date: Date;
+
+  @Column("simple-array", { nullable: true })
+  bets: string[]; // IDs de dictadores que apostaron
 }

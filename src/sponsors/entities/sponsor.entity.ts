@@ -9,8 +9,8 @@ export class Sponsor {
   company_name: string;
 
   @Column('text')
-  donated_items: string; // Lista de objetos donados
+  donated_items: string; // Lista de objetos donados como texto
 
   @Column()
-  preferred_fighter: string; // UUID del concursante apoyado
+  preferred_fighter: string; // UUID del concursante que apoya
 }

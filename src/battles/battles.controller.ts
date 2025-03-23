@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Patch } from '@nestjs/common';
 import { BattlesService } from './battles.service';
-import { CreateBattleDto } from './dto/create-battle.dto';
-import { UpdateBattleDto } from './dto/update-battle.dto';
 import { Battle } from './entities/battle.entity';
 
 @Controller('battles')
@@ -9,8 +7,8 @@ export class BattlesController {
   constructor(private readonly battlesService: BattlesService) {}
 
   @Post()
-  async create(@Body() createBattleDto: CreateBattleDto): Promise<Battle> {
-    return this.battlesService.create(createBattleDto);
+  async create(@Body() battle: Battle): Promise<Battle> {
+    return this.battlesService.create(battle);
   }
 
   @Get()
@@ -24,12 +22,16 @@ export class BattlesController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateBattleDto: UpdateBattleDto): Promise<Battle> {
-    return this.battlesService.update(id, updateBattleDto);
+  async update(@Param('id') id: string, @Body() battle: Battle): Promise<Battle> {
+    return this.battlesService.update(id, battle);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.battlesService.remove(id);
+  // ✅ PATCH para registrar una apuesta de un dictador
+  @Patch(':id/bet')
+  async addBet(
+    @Param('id') id: string,
+    @Body() body: { dictatorId: string }
+  ): Promise<Battle> {
+    return this.battlesService.addBet(id, body.dictatorId);
   }
 }

@@ -25,7 +25,7 @@ export class DictatorsService {
   async findOne(id: string): Promise<Dictator> {
     const dictator = await this.dictatorsRepository.findOne({
       where: { id },
-      relations: ['contestants'], // Ensure related contestants are loaded
+      relations: ['contestants'], 
     });
     if (!dictator) {
       throw new NotFoundException(`Dictator with ID ${id} not found`);

@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Patch } from '@nestjs/common';
 import { SponsorsService } from './sponsors.service';
-import { CreateSponsorDto } from './dto/create-sponsor.dto';
-import { UpdateSponsorDto } from './dto/update-sponsor.dto';
 import { Sponsor } from './entities/sponsor.entity';
 
 @Controller('sponsors')
@@ -9,8 +7,8 @@ export class SponsorsController {
   constructor(private readonly sponsorsService: SponsorsService) {}
 
   @Post()
-  async create(@Body() createSponsorDto: CreateSponsorDto): Promise<Sponsor> {
-    return this.sponsorsService.create(createSponsorDto);
+  async create(@Body() sponsor: Sponsor): Promise<Sponsor> {
+    return this.sponsorsService.create(sponsor);
   }
 
   @Get()
@@ -24,12 +22,16 @@ export class SponsorsController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateSponsorDto: UpdateSponsorDto): Promise<Sponsor> {
-    return this.sponsorsService.update(id, updateSponsorDto);
+  async update(@Param('id') id: string, @Body() sponsor: Sponsor): Promise<Sponsor> {
+    return this.sponsorsService.update(id, sponsor);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.sponsorsService.remove(id);
+  // Donar un ítem y registrar la transacción en el mercado negro
+  @Patch(':id/donate')
+  async donateItem(
+    @Param('id') sponsorId: string,
+    @Body() body: { item: string }
+  ): Promise<string> {
+    return this.sponsorsService.donateItem(sponsorId, body.item);
   }
 }
