@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Sponsor } from './entities/sponsor.entity';
 import { BmTransactionsService } from '../bmtransactions/bmtransactions.service';
+import { CreateSponsorDto } from './dto/create-sponsor.dto';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class SponsorsService {
@@ -10,10 +14,31 @@ export class SponsorsService {
     @InjectRepository(Sponsor)
     private sponsorsRepository: Repository<Sponsor>,
     private bmtransactionsService: BmTransactionsService,
+    private jwtService: JwtService,
   ) {}
 
-  async create(sponsor: Sponsor): Promise<Sponsor> {
+  async create(dto: CreateSponsorDto): Promise<Sponsor> {
+    const sponsor = this.sponsorsRepository.create({
+      ...dto,
+      password: bcrypt.hashSync(dto.password, 10),
+      role: 'sponsor',
+    });
     return this.sponsorsRepository.save(sponsor);
+  }
+
+  async login(dto: LoginDto): Promise<{ token: string }> {
+    const sponsor = await this.sponsorsRepository.findOneBy({ email: dto.email });
+    if (!sponsor) throw new NotFoundException('Invalid credentials');
+
+    const isValid = bcrypt.compareSync(dto.password, sponsor.password);
+    if (!isValid) throw new NotFoundException('Invalid credentials');
+
+    const payload = { email: sponsor.email, role: sponsor.role, sub: sponsor.id };
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+    });
+    
+    return { token };
   }
 
   async findAll(): Promise<Sponsor[]> {
@@ -22,29 +47,17 @@ export class SponsorsService {
 
   async findOne(id: string): Promise<Sponsor> {
     const sponsor = await this.sponsorsRepository.findOneBy({ id });
-    if (!sponsor) {
-      throw new NotFoundException(`Sponsor with ID ${id} not found`);
-    }
+    if (!sponsor) throw new NotFoundException(`Sponsor with ID ${id} not found`);
     return sponsor;
   }
 
-  async update(id: string, sponsor: Sponsor): Promise<Sponsor> {
-    const existingSponsor = await this.sponsorsRepository.findOneBy({ id });
-    if (!existingSponsor) {
-      throw new NotFoundException(`Sponsor with ID ${id} not found`);
-    }
-    await this.sponsorsRepository.update(id, sponsor);
-    const updatedSponsor = await this.sponsorsRepository.findOneBy({ id });
-    if (!updatedSponsor) {
-      throw new NotFoundException(`Sponsor with ID ${id} not found`);
-    }
-    return updatedSponsor;
+  async update(id: string, data: Partial<Sponsor>): Promise<Sponsor> {
+    await this.sponsorsRepository.update(id, data);
+    return this.findOne(id);
   }
 
-  // ✅ Donar un ítem al concursante preferido y registrar la transacción en el mercado negro
   async donateItem(sponsorId: string, item: string): Promise<string> {
     const sponsor = await this.findOne(sponsorId);
-
     sponsor.donated_items += sponsor.donated_items ? `, ${item}` : item;
     await this.sponsorsRepository.save(sponsor);
 
@@ -56,6 +69,6 @@ export class SponsorsService {
       status: 'Completed',
     });
 
-    return `Donación de "${item}" registrada correctamente para el concursante ${sponsor.preferred_fighter}`;
+    return `Donación de "${item}" registrada correctamente`;
   }
 }

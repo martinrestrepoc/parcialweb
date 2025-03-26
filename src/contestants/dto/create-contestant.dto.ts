@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, Max, IsEnum } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsEnum, IsEmail, MinLength } from 'class-validator';
 
 export class CreateContestantDto {
   @IsString()
@@ -32,5 +32,12 @@ export class CreateContestantDto {
   status: 'Alive' | 'Dead' | 'Escaped' | 'Free';
 
   @IsString()
-  dictatorId: string; // id del dictador
+  dictatorId: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(12)
+  password: string;
 }

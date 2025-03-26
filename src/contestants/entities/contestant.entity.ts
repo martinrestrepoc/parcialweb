@@ -36,6 +36,15 @@ export class Contestant {
   @Column()
   rank: string;
 
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  password: string;
+
+  @Column({ default: 'contestant' })
+  role: string;
+
   @ManyToOne(() => Dictator, (dictator) => dictator.contestants)
   dictator: Dictator;
 }

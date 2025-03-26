@@ -1,3 +1,4 @@
+// src/dictators/entities/dictator.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Contestant } from '../../contestants/entities/contestant.entity';
 
@@ -23,4 +24,14 @@ export class Dictator {
 
   @OneToMany(() => Contestant, (contestant) => contestant.dictator)
   contestants: Contestant[];
+
+  @Column({ unique: true }) 
+  email: string;
+
+  @Column() 
+  password: string;
+
+  @Column({ default: 'dictator' }) 
+  role: string;
 }
+

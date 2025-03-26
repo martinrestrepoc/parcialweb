@@ -9,8 +9,17 @@ export class Sponsor {
   company_name: string;
 
   @Column('text')
-  donated_items: string; // Lista de objetos donados como texto
+  donated_items: string;
 
   @Column()
-  preferred_fighter: string; // UUID del concursante que apoya
+  preferred_fighter: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  password: string;
+
+  @Column({ default: 'sponsor' })
+  role: string;
 }

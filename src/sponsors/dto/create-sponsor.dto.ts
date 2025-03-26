@@ -1,4 +1,4 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID, IsEmail, MinLength } from 'class-validator';
 
 export class CreateSponsorDto {
   @IsString()
@@ -9,4 +9,11 @@ export class CreateSponsorDto {
 
   @IsUUID()
   preferred_fighter: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(12)
+  password: string;
 }

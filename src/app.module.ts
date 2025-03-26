@@ -8,11 +8,15 @@ import { SponsorsModule } from './sponsors/sponsors.module';
 import { BmTransactionsModule } from './bmtransactions/bmtransactions.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     // Configuración de TypeORM para conectar a la base de datos de Supabase
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres', // Tipo de base de datos
       url: process.env.DATABASE_URL, // Usamos la variable de entorno para la conexión
